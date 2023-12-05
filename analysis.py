@@ -1,8 +1,5 @@
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import pandas as pd
-
-# import os
-# print("Percorso corrente:", os.getcwd())
 
 # Specifica i tipi di dati per le colonne 6 e 9
 dtype_dict = {'token_id': 'str', 'currency_address': 'str'}
@@ -11,9 +8,34 @@ dtype_dict = {'token_id': 'str', 'currency_address': 'str'}
 nft_trades_df = pd.read_csv('./database/nfts/nft_trades.csv', dtype=dtype_dict)
 merged_twitter_data_df = pd.read_csv('./merged_twitter_data.csv')
 
+print("Colonne disponibili in nft_trades_df:")
+print(nft_trades_df.columns)
 
-# scoprire gli anni più importanti dai plot
+# Estrai l'anno dalla colonna 'date'
+nft_trades_df['year'] = pd.to_datetime(nft_trades_df['date']).dt.year
+
+# Scoprire gli anni più importanti dai plot
+for feature in ["avg_price", "usd_amount"]:
+    plt.figure(figsize=(10, 6))
+
+    for year in nft_trades_df['year'].unique():
+        year_data = nft_trades_df[nft_trades_df['year'] == year]
+        plt.plot(year_data['date'], year_data[feature], label=str(year))
+
+    # Riduci il numero di punti visualizzati campionando casualmente i dati
+    sample_size = 1000  # Scegli il numero di punti da visualizzare
+    sampled_data = nft_trades_df.sample(n=sample_size, random_state=42)
+
+    # Visualizza il grafico
+    plt.plot(sampled_data['date'], sampled_data[feature], label=f"Sampled Data ({sample_size} points)")
+    plt.title(f"{feature} per anno")
+    plt.xlabel('Data')
+    plt.ylabel(feature)
+    plt.legend(loc='upper left')
+    plt.show()
+
 '''
+# scoprire gli anni più importanti dai plot
 for feature in ["avg_price", "usd_amount"]:
     plt.figure(figsize=(10, 6))
     for year in nft_trades_df['year'].unique():
@@ -25,9 +47,9 @@ for feature in ["avg_price", "usd_amount"]:
     plt.ylabel(feature)
     plt.legend(loc='upper left')
     plt.show()
+
+
 '''
-
-
 def find_peaks(data, threshold):
     # Converti la colonna 'date' nel formato datetime
     data['date'] = pd.to_datetime(data['date'])
